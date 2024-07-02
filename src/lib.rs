@@ -4,6 +4,9 @@ pub struct SegKey {
     end: usize,
 }
 impl SegKey {
+    pub fn empty_slice() -> Self {
+        Self { start: 0, end: 0 }
+    }
     pub fn len(&self) -> usize {
         self.end - self.start
     }
