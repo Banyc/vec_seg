@@ -26,9 +26,12 @@ pub struct VecSeg<T> {
     arena: Vec<T>,
 }
 impl<T> VecSeg<T> {
-    pub fn from_vec(mut buf: Vec<T>) -> Self {
-        buf.clear();
-        Self { arena: buf }
+    pub fn from_vec(buf: Vec<T>) -> (Self, SegKey) {
+        let start = 0;
+        let end = buf.len();
+        let key = SegKey { start, end };
+        let this = Self { arena: buf };
+        (this, key)
     }
     pub fn into_vec(self) -> Vec<T> {
         self.arena
