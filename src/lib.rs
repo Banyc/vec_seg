@@ -1,5 +1,3 @@
-const ALIGNMENT: usize = 2;
-
 #[derive(Debug, Clone, Copy)]
 pub struct SegKey {
     start: usize,
@@ -17,29 +15,15 @@ impl SegKey {
     }
 }
 
+#[derive(Debug, Clone, Copy)]
+pub struct OpenSegKey {
+    start: usize,
+}
+
 /// Extension only arena for slices of same items
 #[derive(Debug, Clone)]
 pub struct VecSeg<T> {
     arena: Vec<T>,
-}
-impl<T> VecSeg<T>
-where
-    T: Default,
-{
-    pub fn extend(&mut self, iter: impl Iterator<Item = T>) -> SegKey {
-        let element_size = core::mem::size_of::<T>();
-        let bytes = self.arena.len() * element_size;
-        let padding_bytes = bytes % ALIGNMENT;
-        let padding_elements = padding_bytes / element_size;
-        for _ in 0..padding_elements {
-            self.arena.push(T::default());
-        }
-
-        let start = self.arena.len();
-        self.arena.extend(iter);
-        let end = self.arena.len();
-        SegKey { start, end }
-    }
 }
 impl<T> VecSeg<T> {
     pub fn from_vec(mut buf: Vec<T>) -> Self {
@@ -51,6 +35,25 @@ impl<T> VecSeg<T> {
     }
     pub fn new() -> Self {
         Self { arena: vec![] }
+    }
+
+    pub fn extend(&mut self, iter: impl Iterator<Item = T>) -> SegKey {
+        let start = self.arena.len();
+        self.arena.extend(iter);
+        let end = self.arena.len();
+        SegKey { start, end }
+    }
+    pub fn push(&mut self, item: T) {
+        self.arena.push(item);
+    }
+    pub fn open_seg(&self) -> OpenSegKey {
+        let start = self.arena.len();
+        OpenSegKey { start }
+    }
+    pub fn seal_seg(&self, open_key: OpenSegKey) -> SegKey {
+        let start = open_key.start;
+        let end = self.arena.len();
+        SegKey { start, end }
     }
 
     pub fn slice(&self, key: SegKey) -> &[T] {
