@@ -1,4 +1,4 @@
-const ALIGNMENT: usize = 1;
+const ALIGNMENT: usize = 2;
 
 #[derive(Debug, Clone, Copy)]
 pub struct SegKey {
@@ -42,6 +42,13 @@ where
     }
 }
 impl<T> VecSeg<T> {
+    pub fn from_vec(mut buf: Vec<T>) -> Self {
+        buf.clear();
+        Self { arena: buf }
+    }
+    pub fn into_vec(self) -> Vec<T> {
+        self.arena
+    }
     pub fn new() -> Self {
         Self { arena: vec![] }
     }
